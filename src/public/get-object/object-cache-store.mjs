@@ -5,10 +5,11 @@ import util from 'util'
 
 import config from '../../config'
 
-const [ fsReadFile, fsWriteFile, fsMkdir ] = [
+const [ fsReadFile, fsWriteFile, fsMkdir, fsUnlink ] = [
   util.promisify(fs.readFile).bind(fs.readFile),
   util.promisify(fs.writeFile).bind(fs.writeFile),
-  util.promisify(fs.mkdir).bind(fs.mkdir)
+  util.promisify(fs.mkdir).bind(fs.mkdir),
+  util.promisify(fs.unlink).bind(fs.unlink)
 ]
 
 const calculateCacheHash = (key) => {
@@ -27,10 +28,25 @@ class CacheStore {
   async read (key) {
     try {
       const [metadata, content] = await Promise.all([
-        fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' }),
+        (async () => {
+          const metadata = await fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' })
+          return JSON.parse(metadata)
+        })(),
         fsReadFile(this.path(calculateCacheHash(key)))
       ])
-      const object = Object.assign({ content }, JSON.parse(metadata))
+      // check expire (1day: 1000ms * 60s * 60m * 24h)
+      const expireInMillisecond = Date.parse(metadata.created_at) + (1000 * 60 * 60 * 24)
+      if (Date.now() > expireInMillisecond) {
+        Promise.all([
+          fsUnlink(this.path(calculateCacheHash(key) + '.json')),
+          fsUnlink(this.path(calculateCacheHash(key)))
+        ])
+        return null
+      }
+      const object = Object.assign({
+        content,
+        cache: true
+      }, metadata.object)
       return object
     } catch(e) {
       if (e.code !== 'ENOENT') throw e
@@ -52,7 +68,10 @@ class CacheStore {
         encoding: null
       }),
       fsWriteFile(this.path(calculateCacheHash(key) + '.json'), JSON.stringify(
-        object,
+        {
+          created_at: (new Date()).toISOString(),
+          object
+        },
         (key, value) => [ 'content' ].includes(key) ? undefined : value
       ))
     ])

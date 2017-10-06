@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node --experimental-modules src/index.mjs --clustering",
     "debug": "node --experimental-modules src/index.mjs",
-    "lint": "find src -type f | xargs standard"
+    "lint": "standard 'src/**/*.mjs'"
   },
   "author": "otofune <otofune@gmail.com>",
   "license": "MIT",
@@ -20,6 +20,7 @@
     "aws-sdk": "^2.128.0",
     "dotenv-safe": "^4.0.4",
     "formidable": "^1.1.1",
+    "gm": "^1.23.0",
     "koa": "^2.3.0",
     "koa-router": "^7.2.1",
     "redis": "^2.8.0",

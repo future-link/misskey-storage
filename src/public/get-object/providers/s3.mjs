@@ -2,7 +2,7 @@ import S3 from 'aws-sdk/clients/s3'
 
 import config from '../../../config'
 
-import cacheStore from '../cache-store'
+import objectCacheStore from '../object-cache-store'
 import { objectNotFoundError } from '../errors'
 
 const s3 = new S3()
@@ -28,10 +28,10 @@ const getObjectFromS3 = (key) => new Promise((resolve, reject) => {
 
 // caching wrapper
 const getObjectFromS3Wrapper = async (key) => {
-  const cachedContent = await cacheStore.read(key)
+  const cachedContent = await objectCacheStore.read(key)
   if (cachedContent) return cachedContent
   const content = await getObjectFromS3(key)
-  await cacheStore.write(key, content)
+  await objectCacheStore.write(key, content)
   return content
 }
 

@@ -10,14 +10,14 @@ const optionsValidator = ({ quality }) => {
 const checkOptionsHasDifferenceFromDefault = (options) => {
   let noOption = true
   Object.values(options).forEach(option => { if (option) noOption = false })
-  return noOption
+  return !noOption
 }
 
 export * from './errors'
 
 export default async (key, options) => {
   optionsValidator(options)
-  const object = getByProvider(key)
+  const object = await getByProvider(key)
   if (!checkOptionsHasDifferenceFromDefault(options)) return object
-  return await editWithGraphicsMagick(object, options)
+  return await editWithGraphicsMagick(key, object, options)
 }

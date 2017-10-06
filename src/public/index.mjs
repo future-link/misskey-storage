@@ -21,6 +21,31 @@ const logger = new Logger(cluster.isWorker ? `public#${cluster.worker.id}` : 'pu
 const app = new Koa()
 const router = new Router()
 
+// middleware for invalid status cache
+router.use(async (ctx, next) => {
+  let cache, status, message
+  try {
+    cache = await rCGet(`ms:pc:${ctx.path}`)
+    if (!cache) {
+      ctx.set('MS-ISC-Status', 'MISS')
+      await next()
+      return
+    } else {
+      ctx.set('MS-ISC-Status', 'HIT')
+      const splittedCache = cache.split('/')
+      status = Number.parseInt(splittedCache.shift())
+      message = splittedCache.join('/')
+    }
+  } catch(e) {
+    if (!e.status) throw e
+    await rCSet(`ms:pc:${ctx.path}`, `${e.status}/${e.message}`, 'EX', 60 * 60 * 24)
+    status = e.status
+    message = e.message
+  }
+  ctx.status = status
+  ctx.body = message
+})
+
 router.get('/', async ctx => {
   ctx.status = 204
 })
@@ -34,7 +59,13 @@ router.get('/(.*)', async ctx => {
   }
   try {
     const object = await getObject(key, options)
-    ctx.set('content-type', object.mime)
+    ctx.set('Last-Modified', object.lastModified)
+    ctx.set('MS-Cache-Status', object.cache ? 'HIT' : 'MISS')
+    if (ctx.headers['if-modified-since'] && Date.parse(ctx.headers['if-modified-since']) >= Date.parse(object.lastModified)) {
+      ctx.status = 304
+      return
+    }
+    ctx.set('Content-Type', object.mime)
     ctx.body = object.content
   } catch (e) {
     if (e instanceof objectNotFoundError) ctx.throw(404, 'there is no object that has a given key.')
@@ -47,29 +78,7 @@ app.use(async (ctx, next) => {
   logger.log(`${ctx.method} ${ctx.path}, ${ctx.ip}, ${ctx.headers['user-agent']}`)
   await next()
 })
-// status cacher
-app.use(async (ctx, next) => {
-  let cache, status, message
-  try {
-    cache = await rCGet(`ms:pc:${ctx.path}`)
-    if (!cache) {
-      ctx.set('MS-SC-Status', 'MISS')
-      await next()
-      return
-    } else {
-      ctx.set('MS-SC-Status', 'HIT')
-      const splittedCache = cache.split('/')
-      status = Number.parseInt(splittedCache.shift())
-      message = splittedCache.join('/')
-    }
-  } catch(e) {
-    if (e.status) await rCSet(`ms:pc:${ctx.path}`, `${e.status}/${e.message}`, 'EX', 60 * 60 * 24)
-    status = e.status
-    message = e.message
-  }
-  ctx.status = status
-  ctx.body = message
-})
+
 app.use(router.routes())
 
 export default app
