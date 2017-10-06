@@ -16,13 +16,11 @@ function validator (config) {
   if (!config.passkey) errors.push('[MS_PASSKEY] must set Redis URI with clustering mode.')
 
   if (config.storage.type === 'S3') {
-    if (!MS_STORAGE_S3_BUCKET_NAME)
+    if (!config.storage.s3.bucket)
       errors.push('[MS_STORAGE_S3_BUCKET_NAME] must set bucket name if MS_STORAGE_TYPE is "S3".')
     let awsCredInEnvironmentVariables = true
-    [
-      'AWS_ACCESS_KEY_ID',
-      'AWS_SECRET_ACCESS_KEY'
-    ].forEach(key => {
+    const keys = [ 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY' ]
+    keys.forEach(key => {
       if (!process.env[key]) awsCredInEnvironmentVariables = false
     })
     if (!awsCredInEnvironmentVariables)
@@ -43,7 +41,12 @@ const config = {
     // default 5MB
     max: Number.parseInt(process.env.MS_STORAGE_MAX_SIZE) || 5 * 1000 * 1000,
     // path, for type 'LOCAL'
-    path: path.resolve(process.env.MS_STORAGE_PATH || './uploads')
+    local: {
+      path: path.resolve(process.env.MS_STORAGE_PATH || './uploads')
+    },
+    s3: {
+      bucket: process.env.MS_STORAGE_S3_BUCKET_NAME
+    }
   },
   ports: {
     internal: Number.parseInt(process.env.MS_INTERNAL_PORT),
