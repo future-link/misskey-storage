@@ -1,7 +1,8 @@
 import cluster from 'cluster'
 import os from 'os'
 
-import server from './server'
+import internalServer from './internal-server'
+import publicServer from './public-server'
 import config from './config'
 
 import { Logger } from './tools'
@@ -14,7 +15,7 @@ const logger = new Logger(cluster.isMaster ? 'master' : 'worker')
 if (cluster.isMaster) {
   console.log('> misskey storage provider')
   console.log('> https://github.com/future-link/misskey-storage')
-  console.log(`> server will listen on port ${config.port}` + '\n')
+  console.log(`> server will listen, ${Object.entries(config.ports).map(e => `port ${e[1]} for ${e[0]}`).join(', ')}` + '\n')
 }
 
 if (cluster.isMaster && config.flags.clustering) {
@@ -37,7 +38,8 @@ if (cluster.isMaster && config.flags.clustering) {
     cluster.fork()
   }
 } else {
-  server.listen(config.port)
+  internalServer.listen(config.ports.internal)
+  publicServer.listen(config.ports.public)
   // notice worker number in worker
   if (cluster.isWorker) logger.log(`worker number ${cluster.worker.id} is ready.`)
 }

@@ -92,6 +92,7 @@ v0.delete('/delete', async ctx => {
   const name = splittedPath.join('/')
 
   await common.delete(id, name)
+  ctx.status = 204
 })
 
 export default v0

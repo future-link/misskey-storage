@@ -8,7 +8,7 @@ import { Logger } from './tools'
 
 import v0 from './v0'
 
-const logger = new Logger(cluster.isWorker ? `server#${cluster.worker.id}` : 'server')
+const logger = new Logger(cluster.isWorker ? `internal#${cluster.worker.id}` : 'internal')
 
 const app = new Koa()
 const router = new Router()

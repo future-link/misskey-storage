@@ -10,7 +10,8 @@ function validator (config) {
 
   if (!availableStorageTypes.includes(config.storage.type))
     errors.push(`[MS_STORAGE_TYPE] must be one of [${availableStorageTypes.join(', ')}].`)
-  if (!config.port) errors.push('[MS_PORT] must set application standby port.')
+  if (!config.ports.public) errors.push('[MS_PUBLIC_PORT] must set application standby port.')
+  if (!config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
   if (!config.passkey) errors.push('[MS_PASSKEY] must set Redis URI with clustering mode.')
 
   if (config.storage.type === 'S3') {
@@ -41,7 +42,10 @@ const config = {
     // default 5MB
     max: Number.parseInt(process.env.MS_STORAGE_MAX_SIZE) || 5 * 1000 * 1000
   },
-  port: Number.parseInt(process.env.MS_PORT),
+  ports: {
+    internal: Number.parseInt(process.env.MS_INTERNAL_PORT),
+    public: Number.parseInt(process.env.MS_PUBLIC_PORT)
+  },
   flags: {
     clustering: process.argv.indexOf('--clustering') !== -1
   }
