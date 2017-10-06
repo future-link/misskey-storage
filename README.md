@@ -27,3 +27,16 @@ name|description
 `MS_REDIS_URI`|redis URI, uses to cache abnormality response. in clustering mode, must be set.
 
 if you set `MS_STORAGE_TYPE` to `S3`, must set AWS Environment Credential Variables. see [Loading Credentials in Node.js from Environment Variables](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html).
+
+excellent features than misskey-file
+---
++ More clearly
+  * client(s) can receive correctly error in request.
++ Capacity limit for each uploaded file
++ Caches as possible
+  * graphicsmagick generation object
+  * object deliveried from S3
+  * not found error by ctx.throw
++ Selectable storage type
+  * Local
+  * Amazon Web Service Simple Storage Service S3
