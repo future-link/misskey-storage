@@ -1,0 +1,28 @@
+{
+  "name": "misskey-storage",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/future-link/misskey-storage.git"
+  },
+  "scripts": {
+    "start": "node --experimental-modules src/index.mjs --clustering",
+    "lint": "find src -type f | xargs standard"
+  },
+  "author": "otofune <otofune@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/future-link/misskey-storage/issues"
+  },
+  "homepage": "https://github.com/future-link/misskey-storage#readme",
+  "private": true,
+  "dependencies": {
+    "aws-sdk": "^2.128.0",
+    "dotenv-safe": "^4.0.4",
+    "formidable": "^1.1.1",
+    "koa": "^2.3.0",
+    "koa-router": "^7.2.1"
+  },
+  "devDependencies": {
+    "standard": "^10.0.3"
+  }
+}
