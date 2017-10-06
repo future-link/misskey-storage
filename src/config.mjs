@@ -46,7 +46,8 @@ const config = {
     },
     s3: {
       bucket: process.env.MS_STORAGE_S3_BUCKET_NAME
-    }
+    },
+    cache: path.resolve(process.env.MS_STORAGE_CACHE_PATH || './cache')
   },
   ports: {
     internal: Number.parseInt(process.env.MS_INTERNAL_PORT),

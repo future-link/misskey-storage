@@ -6,7 +6,7 @@ import cluster from 'cluster'
 import config from '../config'
 import { Logger } from '../tools'
 
-import getObjectByKey, { objectNotFoundError, optionInvalidError } from './get-object-by-key'
+import getObject, { objectNotFoundError, optionInvalidError } from './get-object'
 
 const logger = new Logger(cluster.isWorker ? `public#${cluster.worker.id}` : 'public')
 
@@ -25,7 +25,7 @@ router.get('/(.*)', async ctx => {
     quality: Number.parseInt(ctx.query.quality) || null
   }
   try {
-    const object = await getObjectByKey(key, options)
+    const object = await getObject(key, options)
     ctx.set('content-type', object.mime)
     ctx.body = object.content
   } catch (e) {
