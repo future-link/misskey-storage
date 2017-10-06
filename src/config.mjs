@@ -11,10 +11,10 @@ function validator (config) {
 
   if (!availableStorageTypes.includes(config.storage.type))
     errors.push(`[MS_STORAGE_TYPE] must be one of [${availableStorageTypes.join(', ')}].`)
-  if (!config.ports.public) errors.push('[MS_PUBLIC_PORT] must set application standby port.')
-  if (!config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
-  if (!config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
-  if (config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
+  if (config.services.includes('public') && !config.ports.public) errors.push('[MS_PUBLIC_PORT] must set application standby port.')
+  if (config.services.includes('internal') && !config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
+  if (config.services.includes('internal') && !config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
+  if (config.services.includes('public') && config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
 
   if (1 > config.services.length) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
   config.services.forEach(service => {
