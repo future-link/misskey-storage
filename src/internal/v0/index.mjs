@@ -3,7 +3,7 @@ import util from 'util'
 import Router from 'koa-router'
 import formidable from 'formidable'
 
-import config from '../config'
+import config from '../../config'
 
 import * as common from '../common'
 

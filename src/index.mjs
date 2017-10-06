@@ -1,8 +1,8 @@
 import cluster from 'cluster'
 import os from 'os'
 
-import internalServer from './internal-server'
-import publicServer from './public-server'
+import internalServer from './internal'
+import publicServer from './public'
 import config from './config'
 
 import { Logger } from './tools'
