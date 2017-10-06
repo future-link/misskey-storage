@@ -1,4 +1,5 @@
 import dotenv from 'dotenv-safe'
+import path from 'path'
 
 function validator (config) {
   const errors = []
@@ -40,7 +41,9 @@ const config = {
   storage: {
     type: process.env.MS_STORAGE_TYPE,
     // default 5MB
-    max: Number.parseInt(process.env.MS_STORAGE_MAX_SIZE) || 5 * 1000 * 1000
+    max: Number.parseInt(process.env.MS_STORAGE_MAX_SIZE) || 5 * 1000 * 1000,
+    // path, for type 'LOCAL'
+    path: path.resolve(process.env.MS_STORAGE_PATH || './uploads')
   },
   ports: {
     internal: Number.parseInt(process.env.MS_INTERNAL_PORT),
