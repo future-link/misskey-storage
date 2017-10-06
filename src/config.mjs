@@ -13,7 +13,8 @@ function validator (config) {
     errors.push(`[MS_STORAGE_TYPE] must be one of [${availableStorageTypes.join(', ')}].`)
   if (!config.ports.public) errors.push('[MS_PUBLIC_PORT] must set application standby port.')
   if (!config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
-  if (!config.passkey) errors.push('[MS_PASSKEY] must set Redis URI with clustering mode.')
+  if (!config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
+  if (config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
 
   if (config.storage.type === 'S3') {
     if (!config.storage.s3.bucket)
@@ -55,7 +56,8 @@ const config = {
   },
   flags: {
     clustering: process.argv.indexOf('--clustering') !== -1
-  }
+  },
+  redis: process.env.MS_REDIS_URI
 }
 
 const errors = validator(config)

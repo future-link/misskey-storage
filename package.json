@@ -6,6 +6,7 @@
   },
   "scripts": {
     "start": "node --experimental-modules src/index.mjs --clustering",
+    "debug": "node --experimental-modules src/index.mjs",
     "lint": "find src -type f | xargs standard"
   },
   "author": "otofune <otofune@gmail.com>",
@@ -20,7 +21,9 @@
     "dotenv-safe": "^4.0.4",
     "formidable": "^1.1.1",
     "koa": "^2.3.0",
-    "koa-router": "^7.2.1"
+    "koa-router": "^7.2.1",
+    "redis": "^2.8.0",
+    "redis-js": "^0.1.2"
   },
   "devDependencies": {
     "standard": "^10.0.3"
