@@ -16,6 +16,11 @@ function validator (config) {
   if (!config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
   if (config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
 
+  if (1 > config.services.length) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
+  config.services.forEach(service => {
+    if(!['internal', 'public'].includes(service)) errors.push(`[MS_ENABLED_SERVER_SERVICES] unknown service '${service}' setted.`)
+  })
+
   if (config.storage.type === 'S3') {
     if (!config.storage.s3.bucket)
       errors.push('[MS_STORAGE_S3_BUCKET_NAME] must set bucket name if MS_STORAGE_TYPE is "S3".')
@@ -57,7 +62,11 @@ const config = {
   flags: {
     clustering: process.argv.indexOf('--clustering') !== -1
   },
-  redis: process.env.MS_REDIS_URI
+  redis: process.env.MS_REDIS_URI,
+  services:
+    process.env.MS_ENABLED_SERVER_SERVICES ?
+      process.env.MS_ENABLED_SERVER_SERVICES.split(',') :
+      [ 'internal', 'public' ]
 }
 
 const errors = validator(config)
