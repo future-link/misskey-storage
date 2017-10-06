@@ -16,7 +16,6 @@ const putObjectToS3 = (key, binary) => new Promise((resolve, reject) => {
     Body: binary
   }, (e, data) => {
     if (e) return reject(e)
-    console.dir(data)
     return resolve(data)
   })
 })
@@ -32,7 +31,6 @@ const deleteObjectFromS3 = key => new Promise((resolve, reject) => {
     Key: key
   }, (e, data) => {
     if (e) return reject(e)
-    console.dir(data)
     return resolve(data)
   })
 })

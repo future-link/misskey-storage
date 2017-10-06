@@ -75,8 +75,8 @@ v0.put('/rename', async ctx => {
   const { files, fields } = ctx.request.body
 
   missingFieldsChecker(ctx, [ 'old-path', 'new-name' ])
-  const splitedPath = fields['old-path'].split('/')
-  const id = splitedPath.shift()
+  const splittedPath = fields['old-path'].split('/')
+  const id = splittedPath.shift()
   const oldName = splittedPath.join('/')
 
   await manageBucket.rename(id, oldName, fields['new-name'])
@@ -87,8 +87,8 @@ v0.delete('/delete', async ctx => {
   const { files, fields } = ctx.request.body
 
   missingFieldsChecker(ctx, [ 'path' ])
-  const splitedPath = fields['path'].split('/')
-  const id = splitedPath.shift()
+  const splittedPath = fields['path'].split('/')
+  const id = splittedPath.shift()
   const name = splittedPath.join('/')
 
   await manageBucket.remove(id, name)
