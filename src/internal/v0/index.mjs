@@ -5,7 +5,7 @@ import formidable from 'formidable'
 
 import config from '../../config'
 
-import * as common from '../common'
+import * as manageBucket from '../manage-bucket'
 
 const unlink = util.promisify(fs.unlink)
 
@@ -68,7 +68,7 @@ v0.post('/register', async ctx => {
   if (!files.file) ctx.throw(400, `missing file field named 'file'.`)
   missingFieldsChecker(ctx, [ 'file-id' ])
 
-  ctx.body = await common.upload(fields['file-id'], files.file.name, files.file.path)
+  ctx.body = await manageBucket.put(fields['file-id'], files.file.name, files.file.path)
 })
 
 v0.put('/rename', async ctx => {
@@ -79,7 +79,7 @@ v0.put('/rename', async ctx => {
   const id = splitedPath.shift()
   const oldName = splittedPath.join('/')
 
-  await common.rename(id, oldName, fields['new-name'])
+  await manageBucket.rename(id, oldName, fields['new-name'])
   ctx.status = 204
 })
 
@@ -91,7 +91,7 @@ v0.delete('/delete', async ctx => {
   const id = splitedPath.shift()
   const name = splittedPath.join('/')
 
-  await common.delete(id, name)
+  await manageBucket.remove(id, name)
   ctx.status = 204
 })
 
