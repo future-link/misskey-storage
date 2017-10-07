@@ -68,7 +68,8 @@ v0.post('/register', async ctx => {
   if (!files.file) ctx.throw(400, `missing file field named 'file'.`)
   missingFieldsChecker(ctx, [ 'file-id' ])
 
-  ctx.body = await manageBucket.put(fields['file-id'], files.file.name, files.file.path)
+  await manageBucket.put(fields['file-id'], files.file.name, files.file.path)
+  ctx.body = [ config.storage.baseURI, fields['file-id'], files.file.name ].join('/')
 })
 
 v0.put('/rename', async ctx => {
