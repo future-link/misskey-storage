@@ -15,7 +15,7 @@ function validator (config) {
   if (config.services.includes('internal') && !config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
   if (config.services.includes('internal') && !config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
   if (config.services.includes('public') && config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
-  if (config.services.includes('public') && !config.storage.baseURI) errors.push('[MS_PUBLIC_SERVE_URI_BASE] must set URI base for public service. ex: http://localhost:8080')
+  if (config.services.includes('internal') && !config.storage.baseURI) errors.push('[MS_PUBLIC_SERVE_URI_BASE] must set URI base for public service. ex: http://localhost:8080')
 
   if (1 > config.services.length) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
   config.services.forEach(service => {
