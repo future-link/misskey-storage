@@ -1,6 +1,7 @@
 import S3 from 'aws-sdk/clients/s3'
 import fs from 'fs'
 import util from 'util'
+import fileType from 'file-type'
 
 import config from '../../../config'
 import { ContextErrorMimic } from '../../utils'
@@ -9,20 +10,22 @@ const s3 = new S3()
 
 const [ fsReadFile ] = [ util.promisify(fs.readFile).bind(fs.readFile) ]
 
-const putObjectToS3 = (key, binary) => new Promise((resolve, reject) => {
+const putObjectToS3 = (key, binary, mimeType) => new Promise((resolve, reject) => {
   s3.putObject({
     Bucket: config.storage.s3.bucket,
     Key: key,
-    Body: binary
+    Body: binary,
+    ContentType: mimeType
   }, (e, data) => {
     if (e) return reject(e)
     return resolve(data)
   })
 })
 
-export const put = async (id, name, source) => {
+export const put = async (id, name, source, opts = {}) => {
   const binary = await fsReadFile(source)
-  await putObjectToS3([id, name].join('/'), binary)
+  const mimeType = opts.mime || fileType(binary)
+  await putObjectToS3([id, name].join('/'), binary, mimeType)
 }
 
 const deleteObjectFromS3 = key => new Promise((resolve, reject) => {

@@ -68,7 +68,9 @@ v0.post('/register', async ctx => {
   if (!files.file) ctx.throw(400, `missing file field named 'file'.`)
   missingFieldsChecker(ctx, [ 'file-id' ])
 
-  await manageBucket.put(fields['file-id'], files.file.name, files.file.path)
+  await manageBucket.put(fields['file-id'], files.file.name, files.file.path, {
+    mime: files.file.type
+  })
   ctx.body = [ fields['file-id'], files.file.name ].join('/')
 })
 
