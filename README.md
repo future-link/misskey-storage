@@ -26,7 +26,6 @@ name|description
 `MS_PUBLIC_PORT`|standby port of public endpoints, return pictures to users.
 `MS_REDIS_URI`|redis URI, uses to cache abnormality response. in clustering mode, must be set.
 `MS_ENABLED_SERVER_SERVICES`|now enabled server services are selectable. default: 'internal,public'
-`MS_PUBLIC_SERVE_BASE_URI`|base URI of public service. ex: 'http://localhost:8080'
 
 if you set `MS_STORAGE_TYPE` to `S3`, must set AWS Environment Credential Variables. see [Loading Credentials in Node.js from Environment Variables](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html).
 

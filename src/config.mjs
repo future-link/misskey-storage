@@ -15,7 +15,6 @@ function validator (config) {
   if (config.services.includes('internal') && !config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
   if (config.services.includes('internal') && !config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
   if (config.services.includes('public') && config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
-  if (config.services.includes('internal') && !config.storage.baseURI) errors.push('[MS_PUBLIC_SERVE_URI_BASE] must set URI base for public service. ex: http://localhost:8080')
 
   if (1 > config.services.length) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
   config.services.forEach(service => {
@@ -54,12 +53,7 @@ const config = {
     s3: {
       bucket: process.env.MS_STORAGE_S3_BUCKET_NAME
     },
-    cache: path.resolve(process.env.MS_STORAGE_CACHE_PATH || './cache'),
-    baseURI: process.env.MS_PUBLIC_SERVE_BASE_URI ? (
-      process.env.MS_PUBLIC_SERVE_BASE_URI.endsWith('/') ?
-        process.env.MS_PUBLIC_SERVE_BASE_URI.slice(0, -1) :
-        process.env.MS_PUBLIC_SERVE_BASE_URI
-    ) :null
+    cache: path.resolve(process.env.MS_STORAGE_CACHE_PATH || './cache')
   },
   ports: {
     internal: Number.parseInt(process.env.MS_INTERNAL_PORT),
