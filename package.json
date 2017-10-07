@@ -19,11 +19,11 @@
   "dependencies": {
     "aws-sdk": "^2.128.0",
     "dotenv-safe": "^4.0.4",
+    "file-type": "^6.2.0",
     "formidable": "^1.1.1",
     "gm": "^1.23.0",
     "koa": "^2.3.0",
     "koa-router": "^7.2.1",
-    "mime-type": "^3.0.5",
     "redis": "^2.8.0",
     "redis-js": "^0.1.2"
   },
