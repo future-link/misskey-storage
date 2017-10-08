@@ -18,8 +18,20 @@ import getObject, { objectNotFoundError, optionInvalidError } from './get-object
 
 const logger = new Logger(cluster.isWorker ? `public#${cluster.worker.id}` : 'public')
 
-const app = new Koa()
 const router = new Router()
+
+// middleware for CORS
+// CORS
+router.use(async (ctx, next) => {
+  ctx.set('Access-Control-Allow-Origin', '*')
+  if (ctx.method === 'OPTIONS' && ctx.header['access-control-request-method']) {
+    ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    ctx.set('Access-Control-Allow-Headers', 'Content-Type')
+    ctx.status = 204
+    return
+  }
+  await next()
+})
 
 // middleware for invalid status cache
 router.use(async (ctx, next) => {
@@ -73,6 +85,8 @@ router.get('/(.*)', async ctx => {
     throw e
   }
 })
+
+const app = new Koa()
 
 app.use(async (ctx, next) => {
   logger.log(`${ctx.method} ${ctx.path}, ${ctx.ip}, ${ctx.headers['user-agent']}`)
