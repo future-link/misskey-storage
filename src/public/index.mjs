@@ -39,21 +39,19 @@ router.use(async (ctx, next) => {
   try {
     cache = await rCGet(`ms:pc:${ctx.path}`)
     if (!cache) {
-      ctx.set('MS-ISC-Status', 'MISS')
       await next()
       return
-    } else {
-      ctx.set('MS-ISC-Status', 'HIT')
-      const splittedCache = cache.split('/')
-      status = Number.parseInt(splittedCache.shift())
-      message = splittedCache.join('/')
     }
+    const splittedCache = cache.split('/')
+    status = Number.parseInt(splittedCache.shift())
+    message = splittedCache.join('/')
   } catch(e) {
     if (!e.status) throw e
     await rCSet(`ms:pc:${ctx.path}`, `${e.status}/${e.message}`, 'EX', 60 * 60 * 24)
     status = e.status
     message = e.message
   }
+  ctx.set('MS-ISC-Status', cache ? 'HIT' : 'MISS')
   ctx.status = status
   ctx.body = message
 })
@@ -71,7 +69,7 @@ router.get('/(.*)', async ctx => {
   }
   try {
     const object = await getObject(key, options)
-    ctx.set('Last-Modified', (new Date(object.lastModified).toUTCString()))
+    ctx.set('Last-Modified', (new Date(object.lastModified)).toUTCString())
     ctx.set('MS-Cache-Status', object.cache ? 'HIT' : 'MISS')
     if (ctx.headers['if-modified-since'] && Date.parse(ctx.headers['if-modified-since']) >= Date.parse(object.lastModified)) {
       ctx.status = 304
