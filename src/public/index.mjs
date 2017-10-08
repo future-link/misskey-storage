@@ -71,7 +71,7 @@ router.get('/(.*)', async ctx => {
   }
   try {
     const object = await getObject(key, options)
-    ctx.set('Last-Modified', object.lastModified)
+    ctx.set('Last-Modified', (new Date(object.lastModified).toUTCString()))
     ctx.set('MS-Cache-Status', object.cache ? 'HIT' : 'MISS')
     if (ctx.headers['if-modified-since'] && Date.parse(ctx.headers['if-modified-since']) >= Date.parse(object.lastModified)) {
       ctx.status = 304
