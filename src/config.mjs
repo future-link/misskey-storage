@@ -15,6 +15,7 @@ function validator (config) {
   if (config.services.includes('internal') && !config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
   if (config.services.includes('internal') && !config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
   if (config.services.includes('public') && config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
+  if (config.services.includes('internal') && ![0, 1].includes(Math.sign(config.storage.max))) errors.push('[MS_STORAGE_MAX_SIZE] must be positive number.')
 
   if (1 > config.services.length) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
   config.services.forEach(service => {
@@ -45,7 +46,7 @@ const config = {
   storage: {
     type: process.env.MS_STORAGE_TYPE,
     // default 5MB
-    max: Number.parseInt(process.env.MS_STORAGE_MAX_SIZE) || 5 * 1000 * 1000,
+    max: process.env.MS_STORAGE_MAX_SIZE !== undefined ? Number.parseInt(process.env.MS_STORAGE_MAX_SIZE) : 5 * 1000 * 1000,
     // path, for type 'LOCAL'
     local: {
       path: path.resolve(process.env.MS_STORAGE_PATH || './uploads')

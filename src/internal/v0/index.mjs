@@ -14,13 +14,13 @@ const v0 = new Router()
 // formidable wrapper to add maxReceivedSize.
 const formidableWrapperOutOfMaxReceivedSizeErrorMessage = 'detect out of maxReceivedSize.'
 const formidableWrapper = (req, opts = {}) => new Promise((resolve, reject) => {
-  const maxReceivedSize = opts.maxReceivedSize || null
+  const maxReceivedSize = opts.maxReceivedSize !== undefined ? opts.maxReceivedSize : null
   delete opts.maxReceivedSize
 
   const form = new formidable.IncomingForm(opts)
 
   form.on('progress', receivedBytes => {
-    if (maxReceivedSize && receivedBytes > maxReceivedSize)
+    if (maxReceivedSize !== null && receivedBytes > maxReceivedSize)
       // automatic unlink with _error function: https://github.com/felixge/node-formidable/blob/c7e47cd640026d12b64b9270ecb60f6c2585c337/lib/incoming_form.js#L292-L306
       form._error(new Error(formidableWrapperOutOfMaxReceivedSizeErrorMessage))
   })
