@@ -4,6 +4,10 @@ import crypto from 'crypto'
 import util from 'util'
 
 import config from '../../config'
+import { Logger } from '../../tools'
+
+const logger = new Logger
+const debug = (v) => { logger.detail(`get-object/object-cache-store - ${v}`) }
 
 const [ fsReadFile, fsWriteFile, fsMkdir, fsUnlink ] = [
   util.promisify(fs.readFile).bind(fs.readFile),
@@ -11,6 +15,9 @@ const [ fsReadFile, fsWriteFile, fsMkdir, fsUnlink ] = [
   util.promisify(fs.mkdir).bind(fs.mkdir),
   util.promisify(fs.unlink).bind(fs.unlink)
 ]
+
+// quiet unlink runner with killing errors
+const fsUnlinkQuiet = (...rest) => fsUnlink(...rest).catch(e => { return })
 
 const calculateCacheHash = (key) => {
   const hash = crypto.createHash('sha256')
@@ -25,7 +32,18 @@ class CacheStore {
     this.path = (...paths) => path.join(cachePathBase, ...paths)
   }
 
-  async read (key) {
+  /**
+   * read: read from cache store
+   *
+   * @param key cache object key that reads
+   * @param expireAfter expired after this param (ms).
+   *   default expire value -> 1day: 1000ms * 60s * 60m * 24h
+   *   special value null specified, pass checking expiration
+   * @returns object or null
+   *   if there is no object in cache store, returns null
+   */
+  async read (key, expireAfter = 1000 * 60 * 60 * 24) {
+    debug(`[read] request '${key}'`)
     try {
       const [metadata, content] = await Promise.all([
         (async () => {
@@ -34,27 +52,26 @@ class CacheStore {
         })(),
         fsReadFile(this.path(calculateCacheHash(key)))
       ])
-      // check expire (1day: 1000ms * 60s * 60m * 24h)
-      const expireInMillisecond = Date.parse(metadata.created_at) + (1000 * 60 * 60 * 24)
-      if (Date.now() > expireInMillisecond) {
-        Promise.all([
-          fsUnlink(this.path(calculateCacheHash(key) + '.json')),
-          fsUnlink(this.path(calculateCacheHash(key)))
-        ])
-        return null
-      }
-      const object = Object.assign({
+      // check whether the cached content is fresh
+      const fresh = (() => {
+        if (expireAfter === null) return true
+        const expirirationTimeInMillisecond = Date.parse(metadata.available_at) + expireAfter
+        return expirirationTimeInMillisecond > Date.now()
+      })()
+      return Object.assign({
         content,
-        cache: true
+        cache: true,
+        fresh
       }, metadata.object)
-      return object
     } catch(e) {
       if (e.code !== 'ENOENT') throw e
     }
+    debug(`[read] there is no object matching '${key}' in cache store.`)
     return null
   }
 
   async write (key, object) {
+    debug(`[write] request '${key}'`)
     if (!this.basePathExistanceChecked) {
       try {
         await fsMkdir(this.basePath)
@@ -69,11 +86,33 @@ class CacheStore {
       }),
       fsWriteFile(this.path(calculateCacheHash(key) + '.json'), JSON.stringify(
         {
-          created_at: (new Date()).toISOString(),
+          available_at: (new Date()).toISOString(),
           object
         },
         (key, value) => [ 'content' ].includes(key) ? undefined : value
       ))
+    ])
+  }
+
+  // refresh available_at of the metadata in a cached object
+  async refresh (key) {
+    debug(`[refresh] request '${key}'`)
+    try {
+      const metadata = JSON.parse(await fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' }))
+      metadata.available_at = (new Date()).toISOString()
+      await fsWriteFile(this.path(calculateCacheHash(key) + '.json'), JSON.stringify(metadata))
+      return true
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e
+    }
+    return false
+  }
+
+  remove (key) {
+    debug(`[remove] request '${key}'`)
+    return Promise.all([
+      fsUnlinkQuiet(this.path(calculateCacheHash(key) + '.json')),
+      fsUnlinkQuiet(this.path(calculateCacheHash(key)))
     ])
   }
 }

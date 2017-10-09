@@ -6,7 +6,7 @@
   },
   "scripts": {
     "start": "node --experimental-modules src/index.mjs --clustering",
-    "debug": "node --experimental-modules src/index.mjs",
+    "debug": "node --experimental-modules src/index.mjs --verbose",
     "lint": "standard 'src/**/*.mjs'"
   },
   "author": "otofune <otofune@gmail.com>",

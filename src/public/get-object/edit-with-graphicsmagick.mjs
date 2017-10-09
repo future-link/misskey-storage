@@ -2,6 +2,11 @@ import gm from 'gm'
 
 import objectCacheStore from './object-cache-store'
 
+import { Logger } from '../../tools'
+
+const logger = new Logger
+const debug = (v) => { logger.detail(`get-object/edit-with-graphicsmagick - ${v}`) }
+
 const editWithGM = (targetObject, options) => new Promise((resolve, reject) => {
   let query = gm(targetObject.content).autoOrient()
   let mime = targetObject.mime
@@ -48,10 +53,16 @@ const calculateCacheKey = (key, options) => {
 }
 
 export default async (key, targetObject, options) => {
-  const cachedObject = await objectCacheStore.read(calculateCacheKey(key, options))
-  if (cachedObject) return cachedObject
+  debug('try to get a object from cache store...')
+  const cachedObject = await objectCacheStore.read(calculateCacheKey(key, options), null)
+  if (cachedObject && cachedObject.fresh) {
+    debug('there is a valid object from cache store!')
+    return cachedObject
+  }
 
+  debug('try to generate a object with graphicsmagick...')
   const generatedObject = await editWithGM(targetObject, options)
+  debug('generation completed!')
   await objectCacheStore.write(calculateCacheKey(key, options), generatedObject)
 
   return generatedObject

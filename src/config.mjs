@@ -61,7 +61,8 @@ const config = {
     public: Number.parseInt(process.env.MS_PUBLIC_PORT)
   },
   flags: {
-    clustering: process.argv.indexOf('--clustering') !== -1
+    clustering: process.argv.indexOf('--clustering') !== -1,
+    verbose: process.argv.indexOf('--verbose') !== -1
   },
   redis: process.env.MS_REDIS_URI,
   services:
