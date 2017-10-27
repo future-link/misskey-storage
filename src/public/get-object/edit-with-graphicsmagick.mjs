@@ -15,6 +15,7 @@ const editWithGM = (targetObject, options) => new Promise((resolve, reject) => {
   if (options.thumbnail) {
     mime = 'image/jpeg'
     query = query
+      .autoOrient()
       .resize(150, 150)
       .compress('jpeg')
       .quality('80')
@@ -25,6 +26,7 @@ const editWithGM = (targetObject, options) => new Promise((resolve, reject) => {
     if (options.quality) {
       mime = 'image/jpeg'
       query = query
+        .autoOrient()
         .compress('jpeg')
         .quality(options.quality)
     }
