@@ -20,14 +20,18 @@ const formidableWrapper = (req, opts = {}) => new Promise((resolve, reject) => {
   const form = new formidable.IncomingForm(opts)
 
   form.on('progress', receivedBytes => {
-    if (maxReceivedSize !== null && receivedBytes > maxReceivedSize)
+    if (maxReceivedSize !== null && receivedBytes > maxReceivedSize) {
       // automatic unlink with _error function: https://github.com/felixge/node-formidable/blob/c7e47cd640026d12b64b9270ecb60f6c2585c337/lib/incoming_form.js#L292-L306
       form._error(new Error(formidableWrapperOutOfMaxReceivedSizeErrorMessage))
+    }
   })
 
-  form.on('error', e => { reject(e) })
+  form.on('error', reject)
 
-  form.parse(req, (e, fields, files) => { resolve({ fields, files }) })
+  form.parse(req, (e, fields, files) => {
+    if (e) return reject(e)
+    resolve({ fields, files })
+  })
 })
 
 // missing field(s) checker
@@ -44,8 +48,7 @@ v0.use(async (ctx, next) => {
       maxReceivedSize: config.storage.max
     })
   } catch (e) {
-    if (e.message === formidableWrapperOutOfMaxReceivedSizeErrorMessage)
-      ctx.throw(413, `payload size out of ${config.storage.max} bytes.`)
+    if (e.message === formidableWrapperOutOfMaxReceivedSizeErrorMessage) ctx.throw(413, `payload size out of ${config.storage.max} bytes.`)
     throw e
   }
 
@@ -75,7 +78,7 @@ v0.post('/register', async ctx => {
 })
 
 v0.put('/rename', async ctx => {
-  const { files, fields } = ctx.request.body
+  const { fields } = ctx.request.body
 
   missingFieldsChecker(ctx, [ 'old-path', 'new-name' ])
   const splittedPath = fields['old-path'].split('/')
@@ -87,7 +90,7 @@ v0.put('/rename', async ctx => {
 })
 
 v0.delete('/delete', async ctx => {
-  const { files, fields } = ctx.request.body
+  const { fields } = ctx.request.body
 
   missingFieldsChecker(ctx, [ 'path' ])
   const splittedPath = fields['path'].split('/')

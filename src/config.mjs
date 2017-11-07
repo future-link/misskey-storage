@@ -9,29 +9,28 @@ function validator (config) {
     'LOCAL'
   ]
 
-  if (!availableStorageTypes.includes(config.storage.type))
-    errors.push(`[MS_STORAGE_TYPE] must be one of [${availableStorageTypes.join(', ')}].`)
+  if (!availableStorageTypes.includes(config.storage.type)) errors.push(`[MS_STORAGE_TYPE] must be one of [${availableStorageTypes.join(', ')}].`)
   if (config.services.includes('public') && !config.ports.public) errors.push('[MS_PUBLIC_PORT] must set application standby port.')
   if (config.services.includes('internal') && !config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
   if (config.services.includes('internal') && !config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
   if (config.services.includes('public') && config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
   if (config.services.includes('internal') && ![0, 1].includes(Math.sign(config.storage.max))) errors.push('[MS_STORAGE_MAX_SIZE] must be positive number.')
 
-  if (1 > config.services.length) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
+  if (config.services.length < 1) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
   config.services.forEach(service => {
-    if(!['internal', 'public'].includes(service)) errors.push(`[MS_ENABLED_SERVER_SERVICES] unknown service '${service}' setted.`)
+    if (!['internal', 'public'].includes(service)) errors.push(`[MS_ENABLED_SERVER_SERVICES] unknown service '${service}' setted.`)
   })
 
   if (config.storage.type === 'S3') {
-    if (!config.storage.s3.bucket)
-      errors.push('[MS_STORAGE_S3_BUCKET_NAME] must set bucket name if MS_STORAGE_TYPE is "S3".')
+    if (!config.storage.s3.bucket) errors.push('[MS_STORAGE_S3_BUCKET_NAME] must set bucket name if MS_STORAGE_TYPE is "S3".')
     let awsCredInEnvironmentVariables = true
     const keys = [ 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY' ]
     keys.forEach(key => {
       if (!process.env[key]) awsCredInEnvironmentVariables = false
     })
-    if (!awsCredInEnvironmentVariables)
+    if (!awsCredInEnvironmentVariables) {
       errors.push('[MS_STORAGE_TYPE] if value "S3" presented, you must set AWS SDK Credentials to Environment Variables. see http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html.')
+    }
   }
 
   return errors
@@ -66,9 +65,9 @@ const config = {
   },
   redis: process.env.MS_REDIS_URI,
   services:
-    process.env.MS_ENABLED_SERVER_SERVICES ?
-      process.env.MS_ENABLED_SERVER_SERVICES.split(',') :
-      [ 'internal', 'public' ]
+    process.env.MS_ENABLED_SERVER_SERVICES
+      ? process.env.MS_ENABLED_SERVER_SERVICES.split(',')
+      : [ 'internal', 'public' ]
 }
 
 const errors = validator(config)

@@ -3,7 +3,6 @@ import Router from 'koa-router'
 
 import cluster from 'cluster'
 
-import config from '../config'
 import { Logger } from '../tools'
 
 import v0 from './v0'

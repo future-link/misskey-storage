@@ -4,19 +4,19 @@ import Router from 'koa-router'
 import cluster from 'cluster'
 import util from 'util'
 
+import config from '../config'
+import { Logger } from '../tools'
+
+import getObject from './get-object'
+import purgeObject from './purge-object'
+import { ObjectNotFoundError, OptionInvalidError } from './common/errors'
+
 import redis from 'redis'
 const redisClient = redis.createClient(config.redis)
 redisClient.on('error', e => { throw e })
 
 const rCGet = util.promisify(redisClient.get).bind(redisClient)
 const rCSet = util.promisify(redisClient.set).bind(redisClient)
-
-import config from '../config'
-import { Logger } from '../tools'
-
-import getObject from './get-object'
-import purgeObject from './purge-object'
-import { objectNotFoundError, optionInvalidError } from './common/errors'
 
 const logger = new Logger(cluster.isWorker ? `public#${cluster.worker.id}` : 'public')
 
@@ -34,7 +34,7 @@ router.use(async (ctx, next) => {
     const splittedCache = cache.split('/')
     status = Number.parseInt(splittedCache.shift())
     message = splittedCache.join('/')
-  } catch(e) {
+  } catch (e) {
     if (!e.status) throw e
     await rCSet(`ms:pc:${ctx.path}`, `${e.status}/${e.message}`, 'EX', 60 * 60 * 24)
     status = e.status
@@ -63,8 +63,8 @@ router.get('/(.*)', async ctx => {
     ctx.set('Content-Type', object.mime)
     ctx.body = object.content
   } catch (e) {
-    if (e instanceof objectNotFoundError) ctx.throw(404, 'there is no object that has a given key.')
-    if (e instanceof optionInvalidError) ctx.throw(400, e.message)
+    if (e instanceof ObjectNotFoundError) ctx.throw(404, 'there is no object that has a given key.')
+    if (e instanceof OptionInvalidError) ctx.throw(400, e.message)
     throw e
   }
 })
@@ -76,7 +76,7 @@ router.purge('/(.*)', async ctx => {
     ctx.status = 204
     return
   } catch (e) {
-    if (e instanceof objectNotFoundError) ctx.throw(404, 'there is no object that has a given key.')
+    if (e instanceof ObjectNotFoundError) ctx.throw(404, 'there is no object that has a given key.')
     throw e
   }
 })

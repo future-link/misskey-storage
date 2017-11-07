@@ -1,2 +1,2 @@
-export const objectNotFoundError = class extends Error {}
-export const optionInvalidError = class extends Error {}
+export const ObjectNotFoundError = class extends Error {}
+export const OptionInvalidError = class extends Error {}

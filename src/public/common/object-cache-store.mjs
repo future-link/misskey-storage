@@ -5,9 +5,9 @@ import util from 'util'
 
 import config from '../../config'
 import { Logger } from '../../tools'
-import { objectNotFoundError } from './errors'
+import { ObjectNotFoundError } from './errors'
 
-const logger = new Logger
+const logger = new Logger()
 const debug = (v) => { logger.detail(`get-object/object-cache-store - ${v}`) }
 
 const [ fsReadFile, fsWriteFile, fsMkdir, fsUnlink ] = [
@@ -18,7 +18,7 @@ const [ fsReadFile, fsWriteFile, fsMkdir, fsUnlink ] = [
 ]
 
 // quiet unlink runner with killing errors
-const fsUnlinkQuiet = (...rest) => fsUnlink(...rest).catch(e => { return })
+const fsUnlinkQuiet = (...rest) => fsUnlink(...rest).catch(e => { })
 
 const calculateCacheHash = (key) => {
   const hash = crypto.createHash('sha256')
@@ -63,7 +63,7 @@ class CacheStore {
         cache: true,
         fresh
       }, metadata.object)
-    } catch(e) {
+    } catch (e) {
       if (e.code !== 'ENOENT') throw e
     }
     debug(`[read] there is no object matching '${key}' in cache store.`)
@@ -80,7 +80,7 @@ class CacheStore {
       }
       this.basePathExistanceChecked = true
     }
-    return await Promise.all([
+    return Promise.all([
       fsWriteFile(this.path(calculateCacheHash(key)), object.content, {
         encoding: null
       }),
@@ -106,7 +106,7 @@ class CacheStore {
     } catch (e) {
       if (e.code !== 'ENOENT') throw e
     }
-    throw new objectNotFoundError
+    throw new ObjectNotFoundError()
   }
 
   remove (key) {
@@ -128,7 +128,7 @@ class CacheStore {
     } catch (e) {
       if (e.code !== 'ENOENT') throw e
     }
-    throw new objectNotFoundError
+    throw new ObjectNotFoundError()
   }
 }
 

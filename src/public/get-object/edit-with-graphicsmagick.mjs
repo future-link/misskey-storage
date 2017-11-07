@@ -4,7 +4,7 @@ import objectCacheStore from '../common/object-cache-store'
 
 import { Logger } from '../../tools'
 
-const logger = new Logger
+const logger = new Logger()
 const debug = (v) => { logger.detail(`get-object/edit-with-graphicsmagick - ${v}`) }
 
 const editWithGM = (targetObject, options) => new Promise((resolve, reject) => {

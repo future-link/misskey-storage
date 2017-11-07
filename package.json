@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node --experimental-modules src/index.mjs --clustering",
     "debug": "node --experimental-modules src/index.mjs --verbose",
-    "lint": "standard 'src/**/*.mjs'"
+    "lint": "standard 'src/**/*.mjs'",
+    "format": "standard --fix 'src/**/*.mjs'"
   },
   "author": "otofune <otofune@gmail.com>",
   "license": "MIT",

@@ -1,9 +1,10 @@
 import config from './config'
+import util from 'util'
 
 export class Logger {
   constructor (name) {
     this.name = name
-    this.spaces = (new Array(2+1)).join(' ')
+    this.spaces = (new Array(2 + 1)).join(' ')
   }
 
   showPadded (indicator, level) {

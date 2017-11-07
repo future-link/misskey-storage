@@ -38,6 +38,6 @@ const deleteObjectFromS3 = key => new Promise((resolve, reject) => {
   })
 })
 
-export const remove = async (id, name) => await deleteObjectFromS3([id, name].join('/'))
+export const remove = (id, name) => deleteObjectFromS3([id, name].join('/'))
 
 export const rename = async (id, oldName, newName) => { throw ContextErrorMimic(500, 'non implemented.') }

@@ -4,10 +4,10 @@ import config from '../../config'
 import { Logger } from '../../tools'
 
 import objectCacheStore from '../common/object-cache-store'
-import { objectNotFoundError } from '../common/errors'
+import { ObjectNotFoundError } from '../common/errors'
 
 const s3 = new S3()
-const logger = new Logger
+const logger = new Logger()
 const debug = (v) => { logger.detail(`get-object/providers/s3 - ${v}`) }
 
 const getObjectFromS3 = (key, params) => new Promise((resolve, reject) => {
@@ -18,7 +18,7 @@ const getObjectFromS3 = (key, params) => new Promise((resolve, reject) => {
     if (e) {
       if (e.name === 'AccessDenied') {
         debug(`there is no object matching '${key}' in the S3 bucket.`)
-        return reject(new objectNotFoundError)
+        return reject(new ObjectNotFoundError())
       }
       return reject(e)
     }
@@ -50,7 +50,7 @@ const getObjectFromS3Wrapper = async (key) => {
       await objectCacheStore.write(key, object)
       return object
     } catch (e) {
-      if (e instanceof objectNotFoundError && cachedObject) await objectCacheStore.remove(key)
+      if (e instanceof ObjectNotFoundError && cachedObject) await objectCacheStore.remove(key)
       // https://github.com/aws/aws-sdk-js/blob/5880e725ca12f559fcead5cac2c305e55de1ccfb/lib/services/s3.js#L531
       if (e.name !== 'NotModified') throw e
       debug('the received object has no difference a object from cache, refresh it.')

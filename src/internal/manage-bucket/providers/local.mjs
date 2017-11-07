@@ -1,5 +1,3 @@
-import config from '../../../config'
-
 import { ContextErrorMimic } from '../../utils'
 
 export const put = async (id, name, source) => { throw ContextErrorMimic(500, 'non implemented.') }
