@@ -1,6 +1,6 @@
 import getByProvider from './get-by-provider'
 import editWithGraphicsMagick from './edit-with-graphicsmagick'
-import { optionInvalidError } from './errors'
+import { optionInvalidError } from '../common/errors'
 
 const optionsValidator = ({ quality }) => {
   if (quality && quality < 0 || quality > 100)
@@ -12,8 +12,6 @@ const checkOptionsHasDifferenceFromDefault = (options) => {
   Object.values(options).forEach(option => { if (option) noOption = false })
   return !noOption
 }
-
-export * from './errors'
 
 export default async (key, options) => {
   optionsValidator(options)

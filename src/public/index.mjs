@@ -14,24 +14,13 @@ const rCSet = util.promisify(redisClient.set).bind(redisClient)
 import config from '../config'
 import { Logger } from '../tools'
 
-import getObject, { objectNotFoundError, optionInvalidError } from './get-object'
+import getObject from './get-object'
+import purgeObject from './purge-object'
+import { objectNotFoundError, optionInvalidError } from './common/errors'
 
 const logger = new Logger(cluster.isWorker ? `public#${cluster.worker.id}` : 'public')
 
 const router = new Router()
-
-// middleware for CORS
-// CORS
-router.use(async (ctx, next) => {
-  ctx.set('Access-Control-Allow-Origin', '*')
-  if (ctx.method === 'OPTIONS' && ctx.header['access-control-request-method']) {
-    ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    ctx.set('Access-Control-Allow-Headers', 'Content-Type')
-    ctx.status = 204
-    return
-  }
-  await next()
-})
 
 // middleware for invalid status cache
 router.use(async (ctx, next) => {
@@ -54,10 +43,6 @@ router.use(async (ctx, next) => {
   ctx.set('MS-ISC-Status', cache ? 'HIT' : 'MISS')
   ctx.status = status
   ctx.body = message
-})
-
-router.get('/', async ctx => {
-  ctx.status = 204
 })
 
 router.get('/(.*)', async ctx => {
@@ -84,11 +69,48 @@ router.get('/(.*)', async ctx => {
   }
 })
 
+router.purge('/(.*)', async ctx => {
+  const key = ctx.params[0]
+  try {
+    await purgeObject(key)
+    ctx.status = 204
+    return
+  } catch (e) {
+    if (e instanceof objectNotFoundError) ctx.throw(404, 'there is no object that has a given key.')
+    throw e
+  }
+})
+
 const app = new Koa()
 
 app.use(async (ctx, next) => {
   logger.log(`${ctx.method} ${ctx.path}, ${ctx.ip}, ${ctx.headers['user-agent']}`)
   await next()
+})
+
+// for CORS & 'OPTIONS' request
+app.use((ctx, next) => {
+  ctx.set('Access-Control-Allow-Origin', '*')
+  if (ctx.method === 'OPTIONS') {
+    if (ctx.header['access-control-request-method']) {
+      ctx.set('Access-Control-Allow-Methods', 'GET, PURGE, OPTIONS')
+      ctx.set('Access-Control-Allow-Headers', 'Content-Type')
+    }
+    ctx.status = 204
+    return Promise.resolve()
+  }
+  return next()
+})
+
+// root
+app.use((ctx, next) => {
+  if (ctx.path !== '/') return next()
+  if (!['GET'].includes(ctx.method)) {
+    ctx.status = 405
+    return Promise.resolve()
+  }
+  ctx.status = 204
+  return Promise.resolve()
 })
 
 app.use(router.routes())

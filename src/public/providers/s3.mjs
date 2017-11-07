@@ -1,10 +1,10 @@
 import S3 from 'aws-sdk/clients/s3'
 
-import config from '../../../config'
-import { Logger } from '../../../tools'
+import config from '../../config'
+import { Logger } from '../../tools'
 
-import objectCacheStore from '../object-cache-store'
-import { objectNotFoundError } from '../errors'
+import objectCacheStore from '../common/object-cache-store'
+import { objectNotFoundError } from '../common/errors'
 
 const s3 = new S3()
 const logger = new Logger
@@ -63,4 +63,10 @@ const getObjectFromS3Wrapper = async (key) => {
   return object
 }
 
-export default getObjectFromS3Wrapper
+const purgeObject = (key) => {
+  debug('try to purge a object from cache store...')
+  return objectCacheStore.purge(key)
+}
+
+export const get = getObjectFromS3Wrapper
+export const purge = purgeObject

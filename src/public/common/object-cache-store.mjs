@@ -5,6 +5,7 @@ import util from 'util'
 
 import config from '../../config'
 import { Logger } from '../../tools'
+import { objectNotFoundError } from './errors'
 
 const logger = new Logger
 const debug = (v) => { logger.detail(`get-object/object-cache-store - ${v}`) }
@@ -46,15 +47,14 @@ class CacheStore {
     debug(`[read] request '${key}'`)
     try {
       const [metadata, content] = await Promise.all([
-        (async () => {
-          const metadata = await fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' })
-          return JSON.parse(metadata)
-        })(),
+        fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' }).then(JSON.parse),
         fsReadFile(this.path(calculateCacheHash(key)))
       ])
       // check whether the cached content is fresh
       const fresh = (() => {
         if (expireAfter === null) return true
+        // if purged object, return always false
+        if (metadata.purged) return false
         const expirirationTimeInMillisecond = Date.parse(metadata.available_at) + expireAfter
         return expirirationTimeInMillisecond > Date.now()
       })()
@@ -98,14 +98,15 @@ class CacheStore {
   async refresh (key) {
     debug(`[refresh] request '${key}'`)
     try {
-      const metadata = JSON.parse(await fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' }))
+      const metadata = await fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' }).then(JSON.parse)
       metadata.available_at = (new Date()).toISOString()
+      delete metadata.purged
       await fsWriteFile(this.path(calculateCacheHash(key) + '.json'), JSON.stringify(metadata))
-      return true
+      return
     } catch (e) {
       if (e.code !== 'ENOENT') throw e
     }
-    return false
+    throw new objectNotFoundError
   }
 
   remove (key) {
@@ -114,6 +115,20 @@ class CacheStore {
       fsUnlinkQuiet(this.path(calculateCacheHash(key) + '.json')),
       fsUnlinkQuiet(this.path(calculateCacheHash(key)))
     ])
+  }
+
+  async purge (key) {
+    debug(`[purge] request '${key}'`)
+    try {
+      const metadata = await fsReadFile(this.path(calculateCacheHash(key) + '.json'), { encoding: 'utf8' }).then(JSON.parse)
+      if (metadata.purged) return
+      metadata.purged = true
+      await fsWriteFile(this.path(calculateCacheHash(key) + '.json'), JSON.stringify(metadata))
+      return
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e
+    }
+    throw new objectNotFoundError
   }
 }
 

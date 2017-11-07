@@ -1,6 +1,6 @@
 import gm from 'gm'
 
-import objectCacheStore from './object-cache-store'
+import objectCacheStore from '../common/object-cache-store'
 
 import { Logger } from '../../tools'
 
