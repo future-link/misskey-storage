@@ -22,7 +22,6 @@ name|description
 `MS_PASSKEY`|passkey for uploading to this service.
 `MS_INTERNAL_PORT`|standby port of internal endpoints, work with [misskey-delta/misskey-api](https://github.com/misskey-delta/misskey-api).
 `MS_PUBLIC_PORT`|standby port of public endpoints, return pictures to users.
-`MS_REDIS_URI`|redis URI, uses to cache abnormality response. in clustering mode, must be set.
 `MS_ENABLED_SERVER_SERVICES`|now enabled server services are selectable. default: 'internal,public'
 
 if you set `MS_STORAGE_TYPE` to `S3`, must set AWS Environment Credential Variables. see [Loading Credentials in Node.js from Environment Variables](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/loading-node-credentials-environment.html).

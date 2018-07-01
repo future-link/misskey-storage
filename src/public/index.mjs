@@ -2,47 +2,25 @@ import Koa from 'koa'
 import Router from 'koa-router'
 
 import cluster from 'cluster'
-import util from 'util'
 
-import config from '../config'
 import { Logger } from '../tools'
 
 import getObject from './get-object'
 import purgeObject from './purge-object'
 import { ObjectNotFoundError, OptionInvalidError } from './common/errors'
 
-import redis from 'redis'
-const redisClient = redis.createClient(config.redis)
-redisClient.on('error', e => { throw e })
-
-const rCGet = util.promisify(redisClient.get).bind(redisClient)
-const rCSet = util.promisify(redisClient.set).bind(redisClient)
-
 const logger = new Logger(cluster.isWorker ? `public#${cluster.worker.id}` : 'public')
 
 const router = new Router()
 
-// middleware for invalid status cache
 router.use(async (ctx, next) => {
-  let cache, status, message
   try {
-    cache = await rCGet(`ms:pc:${ctx.path}`)
-    if (!cache) {
-      await next()
-      return
-    }
-    const splittedCache = cache.split('/')
-    status = Number.parseInt(splittedCache.shift())
-    message = splittedCache.join('/')
+    await next()
   } catch (e) {
     if (!e.status) throw e
-    await rCSet(`ms:pc:${ctx.path}`, `${e.status}/${e.message}`, 'EX', 60 * 60 * 24)
-    status = e.status
-    message = e.message
+    ctx.status = e.status
+    ctx.body = e.message
   }
-  ctx.set('MS-ISC-Status', cache ? 'HIT' : 'MISS')
-  ctx.status = status
-  ctx.body = message
 })
 
 router.get('/(.*)', async ctx => {

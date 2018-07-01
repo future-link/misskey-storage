@@ -13,7 +13,6 @@ function validator (config) {
   if (config.services.includes('public') && !config.ports.public) errors.push('[MS_PUBLIC_PORT] must set application standby port.')
   if (config.services.includes('internal') && !config.ports.internal) errors.push('[MS_INTERNAL_PORT] must set internal standby port.')
   if (config.services.includes('internal') && !config.passkey) errors.push('[MS_PASSKEY] must set passkey for internal service.')
-  if (config.services.includes('public') && config.flags.clustering && !config.redis) errors.push('[MS_REDIS_URI] must set redis URI with clustering mode.')
   if (config.services.includes('internal') && ![0, 1].includes(Math.sign(config.storage.max))) errors.push('[MS_STORAGE_MAX_SIZE] must be positive number.')
 
   if (config.services.length < 1) errors.push('[MS_ENABLED_SERVER_SERVICES] must set one or more service(s).')
@@ -63,7 +62,6 @@ const config = {
     clustering: process.argv.indexOf('--clustering') !== -1,
     verbose: process.argv.indexOf('--verbose') !== -1
   },
-  redis: process.env.MS_REDIS_URI,
   services:
     process.env.MS_ENABLED_SERVER_SERVICES
       ? process.env.MS_ENABLED_SERVER_SERVICES.split(',')
