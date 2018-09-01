@@ -2,7 +2,7 @@ import fs from 'fs'
 import util from 'util'
 import fileType from 'file-type'
 
-import s3 from '../../deps/s3'
+import s3 from '../../../deps/s3'
 import config from '../../../config'
 import { ContextErrorMimic } from '../../utils'
 
