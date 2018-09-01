@@ -1,5 +1,6 @@
 import dotenv from 'dotenv-safe'
 import path from 'path'
+import fs from 'fs'
 
 function validator (config) {
   const errors = []
@@ -35,9 +36,12 @@ function validator (config) {
   return errors
 }
 
-dotenv.load({
-  allowEmptyValues: true
-})
+try {
+  fs.statSync('.env')
+  dotenv.load({
+    allowEmptyValues: true
+  })
+} catch (e) {}
 
 const config = {
   passkey: process.env.MS_PASSKEY,
