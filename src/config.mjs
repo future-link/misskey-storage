@@ -56,7 +56,7 @@ const config = {
     s3: {
       bucket: process.env.MS_STORAGE_S3_BUCKET_NAME,
       config: process.env.MS_STORAGE_S3_ENDPOINT ? {
-        endpoint: MS_STORAGE_S3_ENDPOINT
+        endpoint: process.env.MS_STORAGE_S3_ENDPOIN
       } : {}
     },
     cache: path.resolve(process.env.MS_STORAGE_CACHE_PATH || './cache')
