@@ -1,12 +1,10 @@
-import S3 from 'aws-sdk/clients/s3'
 import fs from 'fs'
 import util from 'util'
 import fileType from 'file-type'
 
+import s3 from '../../deps/s3'
 import config from '../../../config'
 import { ContextErrorMimic } from '../../utils'
-
-const s3 = new S3()
 
 const [ fsReadFile ] = [ util.promisify(fs.readFile).bind(fs.readFile) ]
 

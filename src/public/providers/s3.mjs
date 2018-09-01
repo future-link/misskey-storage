@@ -1,4 +1,4 @@
-import S3 from 'aws-sdk/clients/s3'
+import s3 from '../../deps/s3'
 
 import config from '../../config'
 import { Logger } from '../../tools'
@@ -6,7 +6,6 @@ import { Logger } from '../../tools'
 import objectCacheStore from '../common/object-cache-store'
 import { ObjectNotFoundError } from '../common/errors'
 
-const s3 = new S3()
 const logger = new Logger()
 const debug = (v) => { logger.detail(`get-object/providers/s3 - ${v}`) }
 
